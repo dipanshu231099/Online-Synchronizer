@@ -4,12 +4,14 @@ import random
 from FileStats import findFileStats
 import hashlib
 import os
+from datetime import datetime
 
-#??
-def hashPath(path):
+ROOT_DB = "rootdb.db"
+
+def genHash():
     # execute hashing here
-    hash = path.split('/')[-1]
-    return path
+    hash = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    return hash
 
 def connection(db_file):
     conn = None
@@ -20,8 +22,7 @@ def connection(db_file):
     return conn
 
 def initialize_dir(path):
-    # key = hashPath(path)
-
+	key = genHash()
     db_name = os.path.abspath(path).replace('/','$$$$')
     db_name += '.db'
     dir_info = findFileStats(path)
@@ -29,9 +30,16 @@ def initialize_dir(path):
         raise Exception("Error: Trying to sync empty directory | If intended --> delete directory and sync")
 
     # if sync lower dir tell higher is synced ??
+	root_conn = sqlite.connect('sync_directories/'+ROOT_DB)
+	root_cur = root_conn.cursor()
+	command = "insert into rootdb values ('{}','{}','automatic')".format(str(path), str(key))
+	root_cur.execute(command)
+	root_conn.commit()
+	root_conn.close()
+
     init_conn = sqlite.connect('sync_directories/'+db_name)
     init_cur = init_conn.cursor()
-    command = "create table info (fname text, mtime text)"
+    command = "create table if not exists info (fname text, mtime text)"
     init_cur.execute(command)
     for i in range(len(dir_info)):
         command = "insert into info values ('{}','{}')".format(str(dir_info[i][0]), str(dir_info[i][1]))
@@ -81,7 +89,6 @@ def check_dir_modifications(path):
 			command = "DELETE FROM info WHERE fname='{}'".format(str(record))
 			conn_cursor.execute(command)
 
-
 	conn.commit()
 	conn.close()
 
@@ -90,8 +97,14 @@ def check_dir_modifications(path):
 
 	return result
 
+def RootDbCreator():
+	db_name = ROOT_DB
+	init_conn = sqlite.connect('sync_directories/'+db_name)
+    init_cur = init_conn.cursor()
+    command = "create table if not exists rootdb (fpath text,Hashkey text, mode text)" # to see if seperate upload frequency can be set
+	init_cur.execute(command)
+	init_conn.commit()
+	init_conn.close()
 
+def manual
 #=========== MAIN ==========#
-path='testdir'
-initialize_dir(path)
-files_to_sync = check_dir_modifications(path)
