@@ -17,9 +17,26 @@ s.bind((SERVER_HOST, SERVER_PORT))
 s.listen(5)
 print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 
+
+
+
+
+def mark_deleted(filename , timestamp, todo_address):
+    f = open(todo_address,"a")
+    f.write()
+
+    return None
+
+def log_insert(filename , operation_code , timestamp):
+    return None
+
+
+
 def func(client_socket):
     
     received = client_socket.recv(BUFFER_SIZE).decode()
+
+    #check condition here for delete message and update todo
     print(received,flush=True)
     filename, filesize = received.split(SEPARATOR)
 
