@@ -26,11 +26,12 @@ def send_file(s , filename):
 
 def make_delete_msg(filename):
     #msg contain header which will be checked on server to identify it as deleted file
-    msg = None
+    delete = "delete"
+    msg = f"{delete}{SEPARATOR}{filename}".encode()
     return msg
 
-def send_message(msg):
-    return None
+def send_message(socketfd , msg):
+    socketfd.send(msg)
 
 def sync(changes , sockid , serverip , server_port):
 

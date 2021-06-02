@@ -37,25 +37,33 @@ def func(client_socket):
     received = client_socket.recv(BUFFER_SIZE).decode()
 
     #check condition here for delete message and update todo
+
+    
     print(received,flush=True)
-    filename, filesize = received.split(SEPARATOR)
+    header, content = received.split(SEPARATOR)
+    if(header=="delete"):
+        None
+    else:
+        filename = header
+        filesize = content
+    #filename, filesize = received.split(SEPARATOR)
 
-    filename = os.path.basename(filename)
+        filename = os.path.basename(filename)
 
-    filesize = int(filesize)
+        filesize = int(filesize)
 
 
-    progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-    with open("hello_", "wb") as f:
-        while True:
+        progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+        with open("hello_", "wb") as f:
+            while True:
                 
-            bytes_read = client_socket.recv(BUFFER_SIZE)
-            if not bytes_read:    
-                    break
+                bytes_read = client_socket.recv(BUFFER_SIZE)
+                if not bytes_read:    
+                        break
                 
-            f.write(bytes_read)
+                f.write(bytes_read)
                 
-            progress.update(len(bytes_read))
+                progress.update(len(bytes_read))
 
     #print("yup",flush =True)
     client_socket.close()
