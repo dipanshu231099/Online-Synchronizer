@@ -45,7 +45,7 @@ def sync(changes , sockid , serverip , server_port):
     for f in delete:
         #make message to with header and filename to notify server to just update todo file
         msg = make_delete_msg(f)
-        send_message(msg)    
+        send_message(sockid , msg)    
        
         
     
@@ -63,5 +63,8 @@ print(f"[+] Connecting to {host}:{port}")
 s.connect((host, port))
 print("[+] Connected.")
 for items in changes:
-    send_file(s,items)
+    tt = make_delete_msg("temp_file")
+    print(tt)
+    send_message(s,tt)
+    #send_file(s,items)
 s.close()

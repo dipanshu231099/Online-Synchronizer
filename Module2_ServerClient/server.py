@@ -42,7 +42,8 @@ def func(client_socket):
     print(received,flush=True)
     header, content = received.split(SEPARATOR)
     if(header=="delete"):
-        None
+        print("file deleted detected")
+        
     else:
         filename = header
         filesize = content
