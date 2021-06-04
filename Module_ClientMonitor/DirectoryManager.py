@@ -23,6 +23,9 @@ import sys
 from datetime import datetime
 import time
 from pathlib import Path
+from getmac import get_mac_address as gma
+import threading
+
 
 
 # *** Global vars ***
@@ -48,6 +51,7 @@ def findFileStats(path):
 # unique key for synced dir
 def genHash():
     hash = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    hash=gma()+"-"+hash
     return hash
 
 
@@ -144,12 +148,13 @@ def check_dir_modifications(path):
 
 
 # change sync mode for dir
-def changeMode(path, new_mode):
-    db_name = ROOT_DB
-    path = os.path.abspath(path)
-    mod_conn = sqlite.connect(pathDB+db_name)
-    mod_cur = mod_conn.cursor()
-    command = "update rootdb set mode='{}' where fpath='{}'".format(str(new_mode), str(path))
+def changeMode(key, new_mode):
+    conn = sqlite.connect(pathDB+ROOT_DB)
+    conn_cursor = conn.cursor()
+    command = "update rootdb set mode='{}' where Hashkey='{}'".format(str(new_mode), key)
+    conn_cursor.execute(command)
+    conn.commit()
+    conn.close()
 
 
 # create root database which stores info for dir to be synced [path,key,sync_mode]
@@ -170,13 +175,13 @@ def RootDbCreator():
 def showSyncedDirs():
     conn = sqlite.connect(pathDB+ROOT_DB)
     cur = conn.cursor()
-    command = "SELECT fpath,Hashkey FROM rootdb"
+    command = "SELECT fpath,Hashkey,mode FROM rootdb"
     cur.execute(command)
     showRecords = cur.fetchall()
 
-    print("(Directory Key)")
+    print("(Directory\tKey\tMode)")
     for showRecord in showRecords:
-        tup = "{} \t {}".format(showRecord[0],showRecord[1])
+        tup = "{} \t {} \t {}".format(showRecord[0],showRecord[1],showRecord[2])
         print(tup)
 
     conn.commit()
@@ -189,14 +194,31 @@ def syncFunction(data):
     print(data)
 
 
+# manual sync dir
+def manualSync(key):
+    conn = sqlite.connect(pathDB+ROOT_DB)
+    conn_cursor = conn.cursor()
+    command = "SELECT fpath FROM rootdb Where Hashkey='{}'".format(key)
+    conn_cursor.execute(command)
+    record = conn_cursor.fetchall()
+    conn.commit()
+    conn.close()
 
+    dir_path = record[0][0]
+    modified_data = check_dir_modifications(dir_path)
+    if not not modified_data:
+        manual_thread = threading.Thread(target=syncFunction, args=(modified_data,))
+        manual_thread.start()
+        manual_thread.join()
 
 
 # TODO
 # syncFunction (Team2 doing)
-# log file - synced or not (server response) -> sync on network
+
 # manual sync
 # change sync mode (provide all dirs synced - choose by key)?
 
+# log file - synced or not (server response) -> sync on network
 # get dir back
+
 # CLI

@@ -24,8 +24,10 @@ while(1):
 	command = "SELECT fpath FROM rootdb Where mode='automatic'"
 	conn_cursor.execute(command)
 	records = conn_cursor.fetchall()
-	path_records = [record[0] for record in records]
+	conn.commit()
+    conn.close()
 
+	path_records = [record[0] for record in records]
 	len_records = len(path_records)
 	threads = []
 	for i in range(len_records):
