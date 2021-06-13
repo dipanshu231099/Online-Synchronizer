@@ -24,6 +24,7 @@ Arguments -
     syncFolderAbsolutePath - C:/a/f
     syncFolderKey - fh
     servrside - ./fh/g/h
+    ===================
 '''
 def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPort):
 
@@ -63,20 +64,18 @@ def getServerSidePath(fileAbsolutePath, syncFolderAbsolutePath, syncFolderKey):
 
 def send_file(s, filename):
     filesize = os.path.getsize(filename)
-    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+    HEADER = "SEND"
+    s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode())
+    
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
         while True:
             
             bytes_read = f.read(BUFFER_SIZE)
             if not bytes_read:
-                
                 break
-            
-            s.sendall(bytes_read)
-            
+            s.sendall(bytes_read) 
             progress.update(len(bytes_read))
-#changes - dictionary new -> [<filepath>], delete -> [<filepath>], modified -> [<filepath>],
 
 def make_delete_msg(filename):
     #msg contain header which will be checked on server to identify it as deleted file
@@ -86,20 +85,3 @@ def make_delete_msg(filename):
 
 def send_message(socketfd, msg):
     socketfd.send(msg)
-
-       
-changes = []
-input_filename = input("Enter filename:")
-changes.append(input_filename)
-host = "127.0.0.1"
-port = 5001
-s = socket.socket()
-print(f"[+] Connecting to {host}:{port}")
-s.connect((host, port))
-print("[+] Connected.")
-for items in changes:
-    tt = make_delete_msg("temp_file")
-    print(tt)
-    send_message(s,tt)
-    #send_file(s,items)
-s.close()

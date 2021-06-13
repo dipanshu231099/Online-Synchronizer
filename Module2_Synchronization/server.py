@@ -32,9 +32,11 @@ def mark_deleted(filename, timestamp, todo_address):
 def log_insert(filename , operation_code , timestamp):
     return None
 
+'''
+main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
+'''
 
-
-def func(client_socket):
+def syncHandler(client_socket):
     
     received = client_socket.recv(BUFFER_SIZE).decode()
 
@@ -42,7 +44,7 @@ def func(client_socket):
 
     
     print(received,flush=True)
-    header, content = received.split(SEPARATOR)
+    header, filepath, content = received.split(SEPARATOR)
     if(header=="delete"):
         print("file deleted detected")
         
