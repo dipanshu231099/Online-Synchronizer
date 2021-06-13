@@ -36,6 +36,14 @@ def log_insert(filename , operation_code , timestamp):
 main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
 '''
 
+'''
+main -> serverSocket open, listen -> accept (non-persistent conncetions) -> syncHandler -> contextSetter -> Modify, Delete (functions) -> 
+Delete :: path -> mark_delete -> .tobedeleted write -> path, timestamp
+Modify :: path -> direclty modify/create
+ActualDelete :: path -> delete
+DeleteRoutine (inside main, main will call it in a thread) - sleep -> wake -> every 1 day intervel 
+'''
+
 def syncHandler(client_socket):
     
     received = client_socket.recv(BUFFER_SIZE).decode()
