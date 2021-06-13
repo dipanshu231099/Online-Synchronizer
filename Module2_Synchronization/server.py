@@ -13,12 +13,18 @@ SEPARATOR = "<SEPARATOR>"
 TODO_FILE = "./.todo"
 
 
-s = socket.socket()
 
-s.bind((SERVER_HOST, SERVER_PORT))
-s.listen(5)
-print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+def listen():
+    s = socket.socket()
 
+    s.bind((SERVER_HOST, SERVER_PORT))
+    s.listen(5)
+    print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+    while (1):
+        client_socket, address = s.accept()
+        print(f"[+] {address} is connected.")
+        start_new_thread(syncHandler, (client_socket,))
+    s.close()
 
 
 # -->
@@ -44,7 +50,21 @@ ActualDelete :: path -> delete
 DeleteRoutine (inside main, main will call it in a thread) - sleep -> wake -> every 1 day intervel 
 '''
 
+def operation_resolve(client_socket):  #aka contextSetter
+    message = client_socket.split(SEPARATOR)
+    operation = message[0]
+    path = message[1]
+    if(operation=="modify"):
+        size = message[2] 
+        return message,path,size
+    else:
+        #operation is delete
+        return message,path,None
+    
+
 def syncHandler(client_socket):
+
+    operation,path,size = operation_resolve(client_socket)
     
     received = client_socket.recv(BUFFER_SIZE).decode()
 
