@@ -10,6 +10,8 @@ SERVER_PORT = 5001
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
 
+TODO_FILE = "./.todo"
+
 
 s = socket.socket()
 
@@ -19,14 +21,14 @@ print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 
 
 
-
-
-def mark_deleted(filename , timestamp, todo_address):
-    f = open(todo_address,"a")
+# -->
+def mark_deleted(filename, timestamp, todo_address):
+    f = open(TODO_FILE,"a")
     f.write()
 
     return None
 
+# -->
 def log_insert(filename , operation_code , timestamp):
     return None
 
@@ -70,6 +72,8 @@ def func(client_socket):
     client_socket.close()
 
     #s.close()
+
+
 tmp=0
 while (1):
     client_socket, address = s.accept() 

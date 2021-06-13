@@ -7,7 +7,7 @@ from queue import Queue
 from _thread import *
 import threading
 
-def send_file(s , filename):
+def send_file(s, filename):
     filesize = os.path.getsize(filename)
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
@@ -30,22 +30,24 @@ def make_delete_msg(filename):
     msg = f"{delete}{SEPARATOR}{filename}".encode()
     return msg
 
-def send_message(socketfd , msg):
+def send_message(socketfd, msg):
     socketfd.send(msg)
 
-def sync(changes , sockid , serverip , server_port):
+
+
+def sync(changes, sockid, serverip, server_port):
 
     modified = changes["modified"]
     new = changes["new"]
     delete = changes["deleted"]
     for f in modified:
-        send_file(sockid , f)
+        send_file(sockid, f)
     for f in new:
-        send_file(sockid , f)
+        send_file(sockid, f)
     for f in delete:
         #make message to with header and filename to notify server to just update todo file
         msg = make_delete_msg(f)
-        send_message(sockid , msg)    
+        send_message(sockid, msg)    
        
         
     
