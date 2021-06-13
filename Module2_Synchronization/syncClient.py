@@ -11,6 +11,11 @@ import threading
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096 
 
+def remove_prefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text
+
 '''
 Main sync function called by ClientMonitor Module
 Arguments - 
@@ -43,7 +48,7 @@ def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPor
         for f in new:
             send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
         for f in delete:
-            #make message to with header and filename to notify server to just update todo file
+            # make message to with header and filename to notify server to just update .tobedeleated file on server side
             msg = make_delete_msg(getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
             send_message(sockid, msg)  
         syncStatus = True
@@ -51,7 +56,7 @@ def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPor
     except Exception as e: 
         print("something's wrong with %s:%d. Exception is %s" % (serverIP, serverPort, e))
     finally:
-        s.close()
+        sockid.close()
 
     return syncStatus
 
@@ -60,12 +65,12 @@ takes a fileAbsolutePath, removes syncFolderAbsolutePath and makes it relative p
 returns that new path
 '''
 def getServerSidePath(fileAbsolutePath, syncFolderAbsolutePath, syncFolderKey):
-    ''''''
+    return "./"+syncFolderKey+remove_prefix(fileAbsolutePath, syncFolderAbsolutePath)
 
 def send_file(s, filename):
     filesize = os.path.getsize(filename)
     HEADER = "SEND"
-    s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode())
+    s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode()) 
     
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
@@ -79,8 +84,8 @@ def send_file(s, filename):
 
 def make_delete_msg(filename):
     #msg contain header which will be checked on server to identify it as deleted file
-    delete = "delete"
-    msg = f"{delete}{SEPARATOR}{filename}".encode()
+    HEADER = "DELETE"
+    msg = f"{HEADER}{SEPARATOR}{filename}".encode()
     return msg
 
 def send_message(socketfd, msg):
