@@ -85,7 +85,7 @@ def send_file(s, filename):
 def make_delete_msg(filename):
     #msg contain header which will be checked on server to identify it as deleted file
     HEADER = "DELETE"
-    msg = f"{HEADER}{SEPARATOR}{filename}".encode()
+    msg = f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}".encode()
     return msg
 
 def send_message(socketfd, msg):

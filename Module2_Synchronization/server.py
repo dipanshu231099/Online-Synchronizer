@@ -14,7 +14,7 @@ TODO_FILE = "./.todo"
 
 
 
-def listen():
+def main():
     s = socket.socket()
 
     s.bind((SERVER_HOST, SERVER_PORT))
@@ -48,6 +48,10 @@ Delete :: path -> mark_delete -> .tobedeleted write -> path, timestamp
 Modify :: path -> direclty modify/create
 ActualDelete :: path -> delete
 DeleteRoutine (inside main, main will call it in a thread) - sleep -> wake -> every 1 day intervel 
+=======================
+main, syncHandler, contexSetter, Modify, Delete, ActualDelete, DeleteRoutine
+=======================
+.tobedeleted -> path, timestamp
 '''
 
 def operation_resolve(client_socket):  #aka contextSetter
@@ -59,7 +63,7 @@ def operation_resolve(client_socket):  #aka contextSetter
         return message,path,size
     else:
         #operation is delete
-        return message,path,None
+        return message, path, None
     
 
 def syncHandler(client_socket):
