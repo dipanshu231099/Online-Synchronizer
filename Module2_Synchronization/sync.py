@@ -19,6 +19,11 @@ Arguments -
     syncFolderAbsolutePath
     serverIP
     serverPort
+    =================
+    changesDict - C:/a/f/g/h
+    syncFolderAbsolutePath - C:/a/f
+    syncFolderKey - fh
+    servrside - ./fh/g/h
 '''
 def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPort):
 
@@ -26,7 +31,7 @@ def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPor
     new = changesDict["new"]
     delete = changesDict["deleted"]
 
-    synced = False
+    syncStatus = False
 
     sockid = socket.socket()
     try:
@@ -40,14 +45,14 @@ def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPor
             #make message to with header and filename to notify server to just update todo file
             msg = make_delete_msg(getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
             send_message(sockid, msg)  
-        synced = True
+        syncStatus = True
 
     except Exception as e: 
         print("something's wrong with %s:%d. Exception is %s" % (serverIP, serverPort, e))
     finally:
         s.close()
 
-    return synced
+    return syncStatus
 
 '''
 takes a fileAbsolutePath, removes syncFolderAbsolutePath and makes it relative path from a folder named syncFolderKey
