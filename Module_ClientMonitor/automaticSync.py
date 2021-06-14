@@ -25,7 +25,7 @@ while(1):
 	conn_cursor.execute(command)
 	records = conn_cursor.fetchall()
 	conn.commit()
-    conn.close()
+	conn.close()
 
 	path_records = [record[0] for record in records]
 	len_records = len(path_records)

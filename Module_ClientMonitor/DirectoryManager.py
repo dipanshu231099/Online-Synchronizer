@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+
 
 # *** Database Structure ***
 # home dir contains "sync_directories"
