@@ -24,8 +24,8 @@ main, syncHandler, contexSetter, Modify, Delete, ActualDelete, DeleteRoutine
 .tobedeleted -> path, timestamp
 '''
 
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 8080
+SERVER_HOST = "localhost"
+SERVER_PORT = 5003
 
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"

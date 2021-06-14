@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from _thread import *
 import threading
+from shutil import make_archive
 
     
 SEPARATOR = "<SEPARATOR>"
@@ -15,6 +16,8 @@ def remove_prefix(text, prefix):
     if text.startswith(prefix):
         return text[len(prefix):]
     return text
+
+
 
 '''
 Main sync function called by ClientMonitor Module
@@ -93,6 +96,26 @@ def make_delete_msg(filename):
     HEADER = "DELETE"
     msg = f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}".encode()
     return msg
+
+def reqFolderSync(syncFolderKey, serverIP, serverPort):
+    downloadStatus = False
+
+    sockid = socket.socket()
+    try:
+        sockid.connect((serverIP, serverPort)) 
+        HEADER = "DOWNLOAD"
+        msg = f"{HEADER}{SEPARATOR}{syncFolderKey}{SEPARATOR}".encode()
+        sockid.send(msg)
+        downloadStatus = True
+
+    except Exception as e: 
+        print("something's wrong with %s:%d. Exception is %s" % (serverIP, serverPort, e))
+    finally:
+        print("in finally")
+        sockid.close()
+
+    return downloadStatus
+
 
 def send_message(socketfd, msg):
     socketfd.send(msg)

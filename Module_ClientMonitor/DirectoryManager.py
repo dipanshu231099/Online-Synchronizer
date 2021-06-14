@@ -30,7 +30,7 @@ sys.path.append('../')
 from Module2_Synchronization.syncClient import *
 
 SERVERIP = 'localhost'
-SERVERPORT = 8080
+SERVERPORT = 5003
 
 
 # *** Global vars ***
