@@ -2,41 +2,8 @@ import socket
 import tqdm
 import os
 from _thread import *
-import threading
-
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 5001
-
-BUFFER_SIZE = 4096
-SEPARATOR = "<SEPARATOR>"
-
-TODO_FILE = "./.todo"
-
-
-
-def main():
-    s = socket.socket()
-
-    s.bind((SERVER_HOST, SERVER_PORT))
-    s.listen(5)
-    print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
-    while (1):
-        client_socket, address = s.accept()
-        print(f"[+] {address} is connected.")
-        start_new_thread(syncHandler, (client_socket,))
-    s.close()
-
-
-# -->
-def mark_deleted(filename, timestamp, todo_address):
-    f = open(TODO_FILE,"a")
-    f.write()
-
-    return None
-
-# -->
-def log_insert(filename , operation_code , timestamp):
-    return None
+from threading import Thread
+import time
 
 '''
 main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
@@ -54,8 +21,29 @@ main, syncHandler, contexSetter, Modify, Delete, ActualDelete, DeleteRoutine
 .tobedeleted -> path, timestamp
 '''
 
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = 5001
+
+BUFFER_SIZE = 4096
+SEPARATOR = "<SEPARATOR>"
+
+TOBEDELETED = "./.tobedeleted"  # set to file path of to_delete file
+
+def mark_deleted(filename, timestamp):
+    f = open(TOBEDELETED,"a")
+    data_added = filename + " " + str(timestamp)
+    f.write(data_added)
+    return None
+
+
+def log_insert(filename , operation_code , timestamp):
+    return None
+
+
 def operation_resolve(client_socket):  #aka contextSetter
-    message = client_socket.split(SEPARATOR)
+    received = client_socket.recv(BUFFER_SIZE).decode()
+    print(received,flush=True)
+    message = received.split(SEPARATOR)
     operation = message[0]
     path = message[1]
     if(operation=="modify"):
@@ -65,55 +53,46 @@ def operation_resolve(client_socket):  #aka contextSetter
         #operation is delete
         return message, path, None
     
+def modify(filename, filesize, client_socket):
+    filesize = int(filesize)
+    progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "wb") as f:
+        while True:
+            
+            bytes_read = client_socket.recv(BUFFER_SIZE)
+            if not bytes_read:
+                break
+            
+            f.write(bytes_read)
+            
+            progress.update(len(bytes_read))
+
+def delete(filename):
+    mark_deleted(filename , time.time())
 
 def syncHandler(client_socket):
 
-    operation,path,size = operation_resolve(client_socket)
+    operation, path, size = operation_resolve(client_socket)
     
-    received = client_socket.recv(BUFFER_SIZE).decode()
-
-    #check condition here for delete message and update todo
-
-    
-    print(received,flush=True)
-    header, filepath, content = received.split(SEPARATOR)
-    if(header=="delete"):
-        print("file deleted detected")
-        
+    if(operation == "DELETE"):
+        delete(path)
     else:
-        filename = header
-        filesize = content
-    #filename, filesize = received.split(SEPARATOR)
+        modify(path, size, client_socket)
 
-        filename = os.path.basename(filename)
-
-        filesize = int(filesize)
-
-
-        progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-        with open("hello_", "wb") as f:
-            while True:
-                
-                bytes_read = client_socket.recv(BUFFER_SIZE)
-                if not bytes_read:    
-                        break
-                
-                f.write(bytes_read)
-                
-                progress.update(len(bytes_read))
-
-    #print("yup",flush =True)
     client_socket.close()
 
-    #s.close()
+def main():
+    s = socket.socket()
 
+    s.bind((SERVER_HOST, SERVER_PORT))
+    s.listen(5)
+    print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+    while (1):
+        client_socket, address = s.accept()
+        print(f"[+] {address} is connected.")
+        start_new_thread(syncHandler, (client_socket,))
 
-tmp=0
-while (1):
-    client_socket, address = s.accept() 
+    s.close()
 
-    print(f"[+] {address} is connected.")
-    start_new_thread(func, (client_socket,))
-s.close()
-    
-
+if __name__ == "__main__":
+    main()
