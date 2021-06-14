@@ -43,6 +43,11 @@ elif(argv[0] == 'sync'):
     else:
         print("#### Unexpected error ####")
 
+elif(argv[0] == "download"):
+    key = argv[1]
+    reqFolderSync(key, SERVERIP, SERVERPORT)
+
+
 else:
     print("Invalid argument passed")
     print(helpStr)

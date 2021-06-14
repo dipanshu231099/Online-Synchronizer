@@ -32,8 +32,21 @@ while(1):
 	threads = []
 	for i in range(len_records):
 		modified_data = check_dir_modifications(path_records[i])
+
+
+		conn = sqlite.connect(pathDB+ROOT_DB)
+		conn_cursor = conn.cursor()
+		command = "SELECT Hashkey FROM rootdb Where fpath='{}'".format(path_records[i])
+		conn_cursor.execute(command)
+		records = conn_cursor.fetchall()
+		key = records[0][0]
+		conn.commit()
+		conn.close()
+
+
+
 		if not not modified_data:
-			new_thread = threading.Thread(target=syncFunction, args=(modified_data,))
+			new_thread = threading.Thread(target=syncFunction, args=(modified_data,key,))
 			threads.append(new_thread)
 			new_thread.start()
 

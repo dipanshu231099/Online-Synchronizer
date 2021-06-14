@@ -144,11 +144,18 @@ def delete(filename):
 def sendFolder(folderPath, client_socket):
     zipfilepath = f"./.{folderPath}"
     try:
+        print("t1",zipfilepath,folderPath)
         make_archive(zipfilepath, 'zip', folderPath)
-        send_file(client_socket, zipfilepath, zipfilepath)
-        actualDelete(zipfilepath)
     except:
-        client_socket.send(f"NOT_FOUND{SEPARATOR}{SEPARATOR}")
+        print("t2 failed")
+        client_socket.send(f"NOT_FOUND{SEPARATOR}{SEPARATOR}".encode())
+        return
+
+    
+    send_file(client_socket, zipfilepath + ".zip", zipfilepath+".zip")
+    print("t3")
+    actualDelete(zipfilepath)
+    print("t4")
 
 def syncHandler(client_socket):
 

@@ -38,8 +38,7 @@ Home_address = str(Path.home())
 pathDB = Home_address+"/sync_directories/"
 ROOT_DB = "rootdb.db"
 
-SERVERIP = 'localhost'
-SERVERPORT = 8080
+
 
 # *** Functions ***
 
@@ -195,9 +194,9 @@ def showSyncedDirs():
 
 
 # sync with remote server
-def syncFunction(data):
+def syncFunction(data,key):
     print("data: ", data)
-    key = "abra-ca-dabra"
+    #key = "abra-ca-dabra"
 
     sync(data, key, SERVERIP, SERVERPORT)
 
