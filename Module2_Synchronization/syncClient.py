@@ -34,12 +34,12 @@ Arguments -
     ./key/g/h
     ===================
 '''
-def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPort):
+def sync(changesDict, syncFolderKey, serverIP, serverPort):
 
     modified = changesDict["modified"]
     new = changesDict["new"]
     delete = changesDict["deleted"]
-
+    syncFolderAbsolutePath = changesDict["syncFolderPath"]
     syncStatus = False
 
     sockid = socket.socket()

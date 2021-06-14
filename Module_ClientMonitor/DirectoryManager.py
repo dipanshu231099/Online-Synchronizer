@@ -25,7 +25,12 @@ import time
 from pathlib import Path
 from getmac import get_mac_address as gma
 import threading
+import sys
+sys.path.append('../')
+from Module2_Synchronization.syncClient import sync
 
+SERVERIP = 'localhost'
+SERVERPORT = 8080
 
 
 # *** Global vars ***
@@ -33,7 +38,8 @@ Home_address = str(Path.home())
 pathDB = Home_address+"/sync_directories/"
 ROOT_DB = "rootdb.db"
 
-
+SERVERIP = 'localhost'
+SERVERPORT = 8080
 
 # *** Functions ***
 
@@ -107,7 +113,7 @@ def check_dir_modifications(path):
     conn = sqlite.connect(pathDB+db_name)
     conn_cursor = conn.cursor()
 
-    result = {"new":[], "deleted":[], "modified":[]}
+    result = {"new":[], "deleted":[], "modified":[], "syncFolderPath" : path}
 
     # get new & modified files
     for i in range(len(dir_info)):
@@ -190,8 +196,10 @@ def showSyncedDirs():
 
 # sync with remote server
 def syncFunction(data):
-    print("sync.......")
-    print(data)
+    print("data: ", data)
+    key = "abra-ca-dabra"
+
+    sync(data, key, SERVERIP, SERVERPORT)
 
 
 # manual sync dir
@@ -207,7 +215,7 @@ def manualSync(key):
     dir_path = record[0][0]
     modified_data = check_dir_modifications(dir_path)
     if not not modified_data:
-        manual_thread = threading.Thread(target=syncFunction, args=(modified_data,))
+        manual_thread = threading.Thread(target=syncFunction, args=(modified_data, ))
         manual_thread.start()
         manual_thread.join()
 
