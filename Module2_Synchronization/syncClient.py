@@ -48,7 +48,7 @@ def sync(changesDict, syncFolderKey, serverIP, serverPort):
     try:
         print("In try")
         
-        print("getSerSide path",getServerSidePath(modified[0], syncFolderAbsolutePath, syncFolderKey))
+        #print("getSerSide path",getServerSidePath(modified[0], syncFolderAbsolutePath, syncFolderKey))
         for f in modified:
             send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey) , f )
         for f in new:

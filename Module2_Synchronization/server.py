@@ -64,6 +64,12 @@ def run_deleteRoutine_inBackground():
         time.sleep(12*60*60)
 
 def mark_deleted(filename, timestamp):
+    if not os.path.exists(os.path.dirname(TOBEDELETED)):
+        try:
+            os.makedirs(os.path.dirname(TOBEDELETED))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
     f = open(TOBEDELETED,"a")
     data_added = filename + " " + str(timestamp) + "\n"
     f.write(data_added)
@@ -77,9 +83,9 @@ def log_insert(filename , operation_code , timestamp):
 def operation_resolve(client_socket):  #aka contextSetter
     
     received = client_socket.recv(BUFFER_SIZE).decode()
-    while(received==""):
-        print("haha")
-        received = client_socket.recv(BUFFER_SIZE).decode()
+    #while(received==""):
+     #   print("haha")
+     #   received = client_socket.recv(BUFFER_SIZE).decode()
     print("reci",received,flush=True)
     message = received.split(SEPARATOR)
     print("messages are",message)
@@ -88,10 +94,10 @@ def operation_resolve(client_socket):  #aka contextSetter
     if(operation=="SEND"):
         size = message[2]
         print("size is",size)
-        return message,path,size
+        return operation,path,size
     else:
         #operation is delete
-        return message, path, None
+        return operation, path, None
     
 def modify(filename, filesize, client_socket):
 
