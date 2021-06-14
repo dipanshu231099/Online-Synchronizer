@@ -44,8 +44,9 @@ def sync(changesDict, syncFolderKey, serverIP, serverPort):
 
     sockid = socket.socket()
     try:
+        print("In try")
         sockid.connect((serverIP, serverPort)) 
-
+        print("getSerSide path",getServerSidePath(modified[0], syncFolderAbsolutePath, syncFolderKey))
         for f in modified:
             send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
         for f in new:
@@ -59,6 +60,7 @@ def sync(changesDict, syncFolderKey, serverIP, serverPort):
     except Exception as e: 
         print("something's wrong with %s:%d. Exception is %s" % (serverIP, serverPort, e))
     finally:
+        print("in finally")
         sockid.close()
 
     return syncStatus
@@ -73,7 +75,8 @@ def getServerSidePath(fileAbsolutePath, syncFolderAbsolutePath, syncFolderKey):
 def send_file(s, filename):
     filesize = os.path.getsize(filename)
     HEADER = "SEND"
-    s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode()) 
+    print("message made:",f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}")
+    print(s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode()) , "no of bytes send") 
     
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:

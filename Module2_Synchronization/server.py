@@ -75,8 +75,9 @@ def log_insert(filename , operation_code , timestamp):
 
 def operation_resolve(client_socket):  #aka contextSetter
     received = client_socket.recv(BUFFER_SIZE).decode()
-    print(received,flush=True)
+    print("reci",received,flush=True)
     message = received.split(SEPARATOR)
+    print("messages are",message)
     operation = message[0]
     path = message[1]
     if(operation=="modify"):
@@ -114,7 +115,7 @@ def delete(filename):
 def syncHandler(client_socket):
 
     operation, path, size = operation_resolve(client_socket)
-    
+    print("op",operation , path , size)
     if(operation == "DELETE"):
         delete(path)
     else:

@@ -27,7 +27,7 @@ from getmac import get_mac_address as gma
 import threading
 import sys
 sys.path.append('../')
-from Module2_Synchronization.syncClient import sync
+from Module2_Synchronization.syncClient import *
 
 SERVERIP = 'localhost'
 SERVERPORT = 8080
