@@ -6,6 +6,7 @@ from _thread import *
 from threading import Thread
 import time
 import schedule
+import errno
 
 '''
 main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
@@ -86,6 +87,14 @@ def operation_resolve(client_socket):  #aka contextSetter
         return message, path, None
     
 def modify(filename, filesize, client_socket):
+
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
     filesize = int(filesize)
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "wb") as f:

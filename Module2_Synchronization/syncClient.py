@@ -93,3 +93,6 @@ def make_delete_msg(filename):
 
 def send_message(socketfd, msg):
     socketfd.send(msg)
+
+def downloadReqFile(filepath):
+    pass
