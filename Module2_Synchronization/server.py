@@ -24,7 +24,7 @@ main, syncHandler, contexSetter, Modify, Delete, ActualDelete, DeleteRoutine
 '''
 
 SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 5001
+SERVER_PORT = 8080
 
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
@@ -55,7 +55,7 @@ def actualDelete(filepath):
         pass 
 
 def run_deleteRoutine_inBackground():
-    schedule.every().day().at("4:00").do(deleteRoutine)
+    schedule.every().day.at("04:00").do(deleteRoutine)
 
     while True:
         schedule.run_pending()
