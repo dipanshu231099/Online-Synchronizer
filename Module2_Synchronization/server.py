@@ -8,6 +8,7 @@ from threading import Thread
 import time
 import schedule
 import errno
+from shutil import make_archive
 
 '''
 main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
@@ -32,6 +33,22 @@ BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
 
 TOBEDELETED = "./.tobedeleted"  # set to file path of to_delete file
+
+def send_file(s, filename , filenme_wrt_client):
+    filesize = os.path.getsize(filenme_wrt_client)
+    HEADER = "ZIP_SEND"
+    print("message made:",f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}")
+    print(s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode()) , "no of bytes send") 
+    
+    progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filenme_wrt_client, "rb") as f:
+        while True:
+            
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                break
+            s.sendall(bytes_read) 
+            progress.update(len(bytes_read))
 
 def deleteRoutine():
     
@@ -124,12 +141,23 @@ def modify(filename, filesize, client_socket):
 def delete(filename):
     mark_deleted(filename , time.time())
 
+def sendFolder(folderPath, client_socket):
+    zipfilepath = f"./.{folderPath}"
+    try:
+        make_archive(zipfilepath, 'zip', folderPath)
+        send_file(client_socket, zipfilepath, zipfilepath)
+        actualDelete(zipfilepath)
+    except:
+        client_socket.send(f"NOT_FOUND{SEPARATOR}{SEPARATOR}")
+
 def syncHandler(client_socket):
 
     operation, path, size = operation_resolve(client_socket)
     print("op",operation , path , size)
-    if(operation == "DELETE"):
+    if (operation == "DELETE"):
         delete(path)
+    elif (operation == "DOWNLOAD"):
+        sendFolder(path, client_socket)
     else:
         modify(path, size, client_socket)
 

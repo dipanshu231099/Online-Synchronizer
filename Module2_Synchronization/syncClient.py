@@ -7,6 +7,7 @@ from queue import Queue
 from _thread import *
 import threading
 from shutil import make_archive
+import errno
 
     
 SEPARATOR = "<SEPARATOR>"
@@ -105,18 +106,51 @@ def reqFolderSync(syncFolderKey, serverIP, serverPort):
     sockid = socket.socket()
     try:
         sockid.connect((serverIP, serverPort)) 
+
         HEADER = "DOWNLOAD"
         msg = f"{HEADER}{SEPARATOR}{syncFolderKey}{SEPARATOR}".encode()
         sockid.send(msg)
+
+        received = sockid.recv(BUFFER_SIZE).decode()
+        HEADER, zipfilename, zipfilesize = received.split(SEPARATOR)
+        
+        if (HEADER == "NOT_FOUND"):
+            print("FOLDER NOT FOUND")
+        else:
+            receiveFile(zipfilename, zipfilesize, sockid)
+
         downloadStatus = True
 
     except Exception as e: 
         print("something's wrong with %s:%d. Exception is %s" % (serverIP, serverPort, e))
+
     finally:
         print("in finally")
         sockid.close()
 
     return downloadStatus
+
+def receiveFile(filename, filesize, client_socket):
+
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    filesize = int(filesize)
+    progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "wb") as f:
+        while True:
+            
+            bytes_read = client_socket.recv(BUFFER_SIZE)
+            if not bytes_read:
+                break
+
+            f.write(bytes_read)
+            
+            progress.update(len(bytes_read))
 
 
 def send_message(socketfd, msg):
