@@ -43,14 +43,16 @@ def sync(changesDict, syncFolderKey, serverIP, serverPort):
     syncStatus = False
 
     sockid = socket.socket()
+    sockid.connect((serverIP, serverPort)) 
+    #sockid.send("hello world".encode())
     try:
         print("In try")
-        sockid.connect((serverIP, serverPort)) 
+        
         print("getSerSide path",getServerSidePath(modified[0], syncFolderAbsolutePath, syncFolderKey))
         for f in modified:
-            send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
+            send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey) , f )
         for f in new:
-            send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
+            send_file(sockid, getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey) , f)
         for f in delete:
             # make message to with header and filename to notify server to just update .tobedeleated file on server side
             msg = make_delete_msg(getServerSidePath(f, syncFolderAbsolutePath, syncFolderKey))
@@ -72,14 +74,14 @@ returns that new path
 def getServerSidePath(fileAbsolutePath, syncFolderAbsolutePath, syncFolderKey):
     return "./"+syncFolderKey+remove_prefix(fileAbsolutePath, syncFolderAbsolutePath)
 
-def send_file(s, filename):
-    filesize = os.path.getsize(filename)
+def send_file(s, filename , filenme_wrt_client):
+    filesize = os.path.getsize(filenme_wrt_client)
     HEADER = "SEND"
     print("message made:",f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}")
     print(s.send(f"{HEADER}{SEPARATOR}{filename}{SEPARATOR}{filesize}".encode()) , "no of bytes send") 
     
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-    with open(filename, "rb") as f:
+    with open(filenme_wrt_client, "rb") as f:
         while True:
             
             bytes_read = f.read(BUFFER_SIZE)

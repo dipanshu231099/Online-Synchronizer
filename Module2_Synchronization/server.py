@@ -1,4 +1,5 @@
 from datetime import datetime
+from queue import PriorityQueue
 import socket
 import tqdm
 import os
@@ -74,14 +75,19 @@ def log_insert(filename , operation_code , timestamp):
 
 
 def operation_resolve(client_socket):  #aka contextSetter
+    
     received = client_socket.recv(BUFFER_SIZE).decode()
+    while(received==""):
+        print("haha")
+        received = client_socket.recv(BUFFER_SIZE).decode()
     print("reci",received,flush=True)
     message = received.split(SEPARATOR)
     print("messages are",message)
     operation = message[0]
     path = message[1]
-    if(operation=="modify"):
-        size = message[2] 
+    if(operation=="SEND"):
+        size = message[2]
+        print("size is",size)
         return message,path,size
     else:
         #operation is delete
