@@ -54,6 +54,13 @@ def actualDelete(filepath):
     except OSError:
         pass 
 
+def run_deleteRoutine_inBackground():
+    schedule.every().day().at("4:00").do(deleteRoutine)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(12*60*60)
+
 def mark_deleted(filename, timestamp):
     f = open(TOBEDELETED,"a")
     data_added = filename + " " + str(timestamp) + "\n"
@@ -112,6 +119,7 @@ def main():
     s.bind((SERVER_HOST, SERVER_PORT))
     s.listen(5)
     print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
+    start_new_thread(run_deleteRoutine_inBackground, ())
     while (1):
         client_socket, address = s.accept()
         print(f"[+] {address} is connected.")
