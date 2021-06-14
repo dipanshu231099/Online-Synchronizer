@@ -29,6 +29,9 @@ Arguments -
     syncFolderAbsolutePath - C:/a/f
     syncFolderKey - fh
     servrside - ./fh/g/h
+    ./f/g/h
+    key
+    ./key/g/h
     ===================
 '''
 def sync(changesDict, syncFolderKey, syncFolderAbsolutePath, serverIP, serverPort):

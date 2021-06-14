@@ -1,9 +1,11 @@
+from datetime import datetime
 import socket
 import tqdm
 import os
 from _thread import *
 from threading import Thread
 import time
+import schedule
 
 '''
 main server side -> threadArray, serverSocket, reqListen -> MODIFY, DELETE, reqHandler -> new thread -> handover -> ~T/F -> todo -> check -> regular time-intervel~ -> log file write-append
@@ -29,9 +31,32 @@ SEPARATOR = "<SEPARATOR>"
 
 TOBEDELETED = "./.tobedeleted"  # set to file path of to_delete file
 
+def deleteRoutine():
+    
+    with open(TOBEDELETED, 'r+') as tobedeleted:
+        tasks = tobedeleted.readlines()
+        tobedeleted.seek(0)
+        for task in tasks:
+            filepath, timestamp = task.strip("\n").split(" ")
+            delete_date = datetime.fromtimestamp(float(timestamp)/1000)
+            curr_date = datetime.now()
+            del_days = (curr_date - delete_date).days
+            if (del_days >= 30):
+                actualDelete(filepath)
+            else:
+                tobedeleted.write(task)
+        tobedeleted.truncate()
+    
+
+def actualDelete(filepath):
+    try:
+        os.remove(filepath)
+    except OSError:
+        pass 
+
 def mark_deleted(filename, timestamp):
     f = open(TOBEDELETED,"a")
-    data_added = filename + " " + str(timestamp)
+    data_added = filename + " " + str(timestamp) + "\n"
     f.write(data_added)
     return None
 
@@ -62,7 +87,7 @@ def modify(filename, filesize, client_socket):
             bytes_read = client_socket.recv(BUFFER_SIZE)
             if not bytes_read:
                 break
-            
+
             f.write(bytes_read)
             
             progress.update(len(bytes_read))
